@@ -6,6 +6,6 @@
         * [Basics](docs/ind_class_list_basic.md)
         * [Permutation](docs/ind_class_list_permutation.md)
     * [Binary Trees](docs/ind_class_bintree.md)
-* Sorting
-    * List Sort
-        * [Insertion Sort](docs/sort_list.md)
+* [Sorting](docs/sort.md)
+    * [List Sort](docs/sort_list.md)
+        * [Insertion Sort](docs/sort_list_insertion.md)
