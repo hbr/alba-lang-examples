@@ -186,6 +186,100 @@ times results in the original list.
         end
 
 
+#### Performance Improvement by Tail Recursion
+
+The recursive definition of list reversal as shown above is computationally
+not very efficient. It iterates over the whole list to reverse and has to
+append at every level of this iteration the head element to the end. This
+algorithm is quadratic on the length of the list. There should be an algorithm
+which takes only linear time.
+
+Intuitively we take the first element of the list and prepend it to an empty
+list. Then we take the next element and prepend it to the previous list and so
+on.
+
+In order to do that we need some variable to store the intermediate
+results. Let's call this accumulator variable `acc`. Our improved algorithm
+shall prepend the reversed remainder of the list in front of the accumulator
+variable i.e. it has to satisfy the invariant
+
+    a.reverse_prepend(acc) = -a + acc
+
+If we can design such a function we can reverse any list `a` by calling
+`a.reverse_prepend([])`.
+
+It is not difficult to define such a function.
+
+    reverse_prepend(a,acc:[A]): [A]
+        -> inspect
+               a
+           case [] then
+               acc
+           case x ^ xs then
+               xs.reverse_prepend(x ^ acc)
+
+
+Although clear by intutition we shall be able to prove that `reverse_prepend`
+satisfies the stated invariant. We can prove the invariant by induction on the
+list to be reversed.
+
+
+    all(a,acc:[A])
+        ensure
+            a.reverse_prepend(acc) = -a + acc
+        inspect
+            a
+        case x ^ xs
+            -- hypo  all(acc) xs.reverse_prepend(acc) = -xs + acc
+            -- goal: (x^xs).reverse_prepend(acc) = -x^xs + acc
+            via [
+                  (x ^ xs).reverse_prepend(acc)
+                , xs.reverse_prepend(x ^ acc)    -- def 'reverse_prepend'
+                , -xs + x^acc                    -- ind hypo
+                , -xs + ([x] + acc)              -- def '+'
+                , -xs + [x] + acc                -- assoc
+                , - x^xs + acc                   -- def '-'
+                ]
+        end
+
+The case of an empty list is a triviality and requires the proof engine only
+to evaluate the goal. The inductive case needs some annotations. As before we
+transform the left hand side step by step into the right hand side.
+
+Note that Alba's prove engine does not prove the goal
+
+    a.reverse_prepend(acc) = -a + acc
+
+for all `a`. It proves the stronger goal
+
+    all(acc) a.reverse_prepend(acc) = -a + acc
+
+Therefore we get a stronger induction hypothesis in the inductive case. In our
+prove the stronger induction hypothesis is essential. In the via proof we
+could not do the transition from step 2 to step 3 without the
+generalization. We have to apply the induction hypothesis to `x ^ acc` and not
+to `acc`.
+
+Now comes the easy part to show that we can use `reverse_prepend` to compute
+the reverse of a list.
+
+    all(a:[A])
+        ensure
+            a.reverse_prepend([]) = -a
+        via
+            [ -a + [] ]
+        end
+
+
+Note that `reverse_prepend` is does not only perform in linear time. It is
+also tail recursive. A recursive function is called tail recursive if the
+result of a recursive call directly represents the desired result. No more
+operations on the return value of a recursive call are needed.
+
+A tail recursive function has the advantage that no stack is needed at runtime
+to compute the function. I.e. our tail recursive variant for list reversal is
+not only more time efficient, it is more space efficient than the recursive
+version as well.
 
 
 

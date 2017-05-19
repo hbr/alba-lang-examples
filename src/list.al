@@ -28,6 +28,7 @@ all(a,b,c:[A])
         a + b + c = a + (b + c)
     inspect
         a
+    case x ^ a
     end
 
 
@@ -78,6 +79,63 @@ all(a:[A])
             , x ^ xs              -- def '+'
             ]
     end
+
+
+
+-- tail recursive reversal -------------------------------
+reverse_prepend (a:[A], acc:[A]): [A]
+        -- The reversed list 'a' prepended in front of 'acc'.
+    -> inspect
+           a
+       case [] then
+           acc
+       case x ^ xs then
+           xs.reverse_prepend(x ^ acc)
+
+
+
+all(a,acc:[A])
+    ensure
+        a.reverse_prepend(acc) = -a + acc
+    inspect
+        a
+    case x ^ xs
+        -- hypo  all(acc) xs.reverse_prepend(acc) = -xs + acc
+        -- goal: (x^xs).reverse_prepend(acc) = -x^xs + acc
+        via [
+              (x ^ xs).reverse_prepend(acc)
+            , xs.reverse_prepend(x ^ acc)    -- def 'reverse_prepend'
+            , -xs + x^acc                    -- ind hypo
+            , -xs + ([x] + acc)              -- def '+'
+            , -xs + [x] + acc                -- assoc
+            , - x^xs + acc                   -- def '-'
+            ]
+    end
+
+all(a:[A])
+    ensure
+        a.reverse_prepend([]) = -a
+    via
+        [ -a + [] ]
+    end
+
+
+
+-- tail recursive concatenation -------------------------------
+concat(a,b:[A]): [A]
+    -> a.reverse_prepend([]).reverse_prepend(b)
+
+all(a,b:[A])
+    ensure
+        concat(a,b) = a + b
+    via [
+        (-a).reverse_prepend(b),
+        (- - a) + b
+    ]
+    end
+
+
+
 
 
 
