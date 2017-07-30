@@ -1,0 +1,67 @@
+use
+    lambda_basic
+end
+
+all(a:TERM, n,m,k,l:NATURAL)
+        -- upshifting
+    ensure
+        -- zero upshift
+        a.up_from(n,0) = a
+
+        -- cumulate upshift
+        a.up_from(k,n).up_from(k,m) = a.up_from(k,n+m)
+
+        -- double upshift
+        k <= m ==>
+        a.up_from(m,n).up_from(k,l) = a.up_from(k,l).up_from(m+l,n)
+    end
+
+
+all(n,k:NATURAL, a,b:TERM)
+        -- Substitute non present variables.
+    ensure
+        a.up_from(n,k+1).sub(n+k,b) = a.up_from(n,k)
+    end
+
+all(a,b,c:TERM, n:NATURAL)
+        -- Swap substitutions base case
+    ensure
+        a.sub(b).sub(n,c) = a.sub(n+1,c.up).sub(b.sub(n,c))
+    end
+
+
+all(k,m,n:NATURAL, a,b,c:TERM)
+    require
+        m <= k
+    ensure
+        {: Instead of substituting 'k' by 'b' and then shifting up from
+           'm' by 'n' ('k' is included)
+        :}
+        a.sub(k,b).up_from(m,n)
+        =
+        {: we can first do the upshift and then substitute 'k+n' by the upshifted
+           term 'b'
+        :}
+        a.up_from(m,n).sub(k+n,b.up_from(m,n))
+
+
+
+        {: Instead of substituting 'm' by 'b' and then shifting up from
+           'k' by 'n' ('m' is not included)
+        :}
+        a.sub(m,b).up_from(k,n)
+        =
+        {: we can first do the upshift starting from 'k+1'  and then substitute
+           'm' by the upshifted term 'b'
+
+        :}
+        a.up_from(k+1,n).sub(m,b.up_from(k,n))
+              --  ^ shifts above m
+              --  m is not affected
+
+
+        -- Swap substitutions
+        a.sub(m,b).sub(k,c.up(m))
+        =
+        a.sub(k+1,c.up(m).up).sub(m,b.sub(k,c.up(m)))
+    end

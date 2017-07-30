@@ -1,0 +1,135 @@
+use
+    alba.base.natural
+    alba.base.endorelation
+end
+
+
+class
+    TERM
+create
+    var(id:NATURAL)
+    (*) (fun,arg:TERM)
+    lam (inner:TERM)
+end
+
+
+
+
+
+{: Shifting Terms Up
+   =================
+:}
+up_from (t:TERM, start,n:NATURAL): TERM
+        -- The term 't' with all variables from 'start' shifted up by 'n'.
+    -> inspect
+           t
+       case var(i) then
+           if i < start then
+               var(i)
+           else
+               var(i+n)
+       case a * b then
+           a.up_from(start,n) * b.up_from(start,n)
+       case lam(a) then
+           lam( a.up_from(start+1,n) )
+
+
+up (t:TERM): TERM
+    -> t.up_from(0,1)
+
+up(a:TERM,k:NATURAL):TERM
+    -> a.up_from(0,k)
+
+
+
+
+
+{:
+Substitution of Variables
+=========================
+:}
+
+sub (a:TERM, n:NATURAL, b:TERM): TERM
+        -- The term 'a' with variable 'n' substituted by 'b'.
+    -> inspect
+           a
+       case var(i) then
+           if i < n then
+               var(i)
+           else if i = n then
+               b
+           else
+               var(i - 1)
+       case x * y then
+           x.sub(n,b) * y.sub(n,b)
+       case lam(x) then
+           lam ( x.sub(n+1, b.up) )
+
+sub (a,b:TERM): TERM
+    -> a.sub(0,b)
+
+
+
+
+
+
+
+{: Beta reduction
+   ==============
+:}
+beta: ghost {TERM,TERM}
+    = {(r):
+          all(a,b) r(lam(a)*b, a.sub(b))
+          ,
+          all(a,b) r(a,b) ==> r(lam(a), lam(b))
+          ,
+          all(a,b,c) r(a,b) ==> r(a*c, b*c)
+          ,
+          all(a,b,c) r(a,b) ==> r(c*a, c*b)
+      }
+
+
+
+is_reducible (a:TERM): ghost BOOLEAN
+    -> a in beta.domain
+
+is_normal (a:TERM): ghost BOOLEAN
+    -> not a.is_reducible
+
+
+identity: TERM
+    = lam(var(0))
+
+
+all(a,b,c:TERM,i,j:NATURAL)
+    ensure
+        var(i).sub(i,a) = a
+        i < j ==> var(i).sub(j,a) = var(i)
+        j < i ==> var(i).sub(j,a) = var(i-1)
+
+        beta(lam(a)*b, a.sub(0,b))
+
+        a in beta.range
+
+        beta(identity * a, a)
+
+        (*beta)(a,b) ==> (*beta)(lam(a),lam(b))
+        (*beta)(a,b) ==> (*beta)(a*c,b*c)
+        (*beta)(a,b) ==> (*beta)(c*a,c*b)
+
+        not a.is_normal ==> a.is_reducible
+        not a.is_normal ==> some(b) beta(a,b)
+        lam(a).is_normal ==> a.is_normal
+        a.is_normal ==> lam(a).is_normal
+
+        beta(var(i),a) ==> false
+
+        beta(lam(a),b) ==> some(x) beta(a,x) and b = lam(x)
+
+        beta(a*b, c) ==> a.is_normal
+        ==> a as lam(_) or b.is_reducible
+
+        beta(a*b, c) ==> a.is_normal ==> not (a as lam(_))
+        ==> b.is_reducible
+
+    end
