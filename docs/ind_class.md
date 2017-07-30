@@ -1,7 +1,4 @@
-# Inductive Classes
-
-In this chapter we demonstrate how to use inductive class, define recursive
-functions and prove properties about them.
+# Computability
 
 <!---
 Local Variables:

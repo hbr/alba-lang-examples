@@ -9,3 +9,5 @@
 * [Sorting](docs/sort.md)
     * [List Sort](docs/sort_list.md)
         * [Insertion Sort](docs/sort_list_insertion.md)
+* [Computability](docs/computability.md)
+    * [Lambda Calculus](docs/lambda.md)

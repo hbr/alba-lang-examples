@@ -1,4 +1,4 @@
-# Basics
+# List Basics
 
 The class `LIST` is defined in the module `core` of the library
 `alba.base`. We use this definition here.
@@ -7,7 +7,7 @@ The class `LIST` is defined in the module `core` of the library
         alba.base.core
     end
 
-    {: Makes the following declaration available:
+    {: The use clause makes the following declaration available:
 
        class
            LIST[A]
@@ -53,8 +53,8 @@ It is useless to write them down because the compiler does the job in any
 complicated context by evaluation and does not need these theorems.
 
 However the compiler is unable to evaluate the expression `a + []` to `a`
-because none the pattern in the definition of `+` matches. I.e. the compiler
-cannot prove `a + [] = a` automatically.
+because none of the pattern in the definition of `+` matches. I.e. the
+compiler cannot prove `a + [] = a` automatically.
 
 The class `LIST` has only two constructors `[]` and `^`. If `a` is a list then
 it must have been constructed by one of the constructors.
