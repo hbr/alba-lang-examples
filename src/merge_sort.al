@@ -70,26 +70,18 @@ all(a,b:[L])
              -- goal: merge(x ^ y ^ c,[u]) in sorted_lists
              if x <= u
                  assert
-                     merge(x^y^c,[u]) = x ^ merge(y^c,[u])
-                     merge(y^c,[u]) in sorted_lists -- ind hypo
+                     merge(y^c, [u]) in sorted_lists -- from ind hypo
                  if y <= u
-                     assert
-                         merge(y^c,[u]) = y ^ merge(c,[u])
                  else
-                     assert
-                         merge(y^c,[u]) = u ^ y ^ c
              else
          case all(u:L,v,d) u <= v ==>
-                            v ^ d in sorted_lists ==>
-                            u^v^d in sorted_lists
-             -- goal: merge(x^y^c,u^v^d) in sorted_lists
+                           v^d   in sorted_lists ==>
+                           u^v^d in sorted_lists
+             -- goal: merge(x^y^c, u^v^d) in sorted_lists
              if x <= u
                  assert
-                      merge(x^y^c,u^v^d) = x^merge(y^c,u^v^d)
-                      merge(y^c,u^v^d) in sorted_lists
+                      merge(y^c, u^v^d) in sorted_lists  -- from ind hypo
                  if y <= u
-                     assert
-                          merge(y^c,u^v^d) = y^merge(c,u^v^d)
                  else
              else
                  if x <= v
@@ -103,7 +95,7 @@ all(a,b:[L])
    ======================
 :}
 
-sorted_stacks: ghost {[OPTION[[L]]]}
+sorted_stacks: ghost {[OPTION([L])]}
     = {(p):
            [] in p
            ,
@@ -116,7 +108,7 @@ sorted_stacks: ghost {[OPTION[[L]]]}
 
 
 
-into_stack (a:[L], stack: [OPTION[[L]]]): [OPTION[[L]]]
+into_stack (a:[L], stack: [OPTION([L])]): [OPTION([L])]
         -- Merge the sorted list 'a' into the stack.
     -> inspect
            stack
@@ -128,7 +120,7 @@ into_stack (a:[L], stack: [OPTION[[L]]]): [OPTION[[L]]]
            none ^ into_stack(merge(a,b),rest)
 
 
-all(a:[L], stack:[OPTION[[L]]])
+all(a:[L], stack:[OPTION([L])])
      require
           stack in sorted_stacks
           a in sorted_lists
@@ -139,7 +131,7 @@ all(a:[L], stack:[OPTION[[L]]])
      end
 
 
-make_stack(a:[L], stack: [OPTION[[L]]]): [OPTION[[L]]]
+make_stack(a:[L], stack: [OPTION([L])]): [OPTION([L])]
     -> inspect
            a
        case [] then
@@ -147,7 +139,7 @@ make_stack(a:[L], stack: [OPTION[[L]]]): [OPTION[[L]]]
        case x ^ xs then
            make_stack(xs, [x].into_stack(stack))
 
-all(a:[L], stack:[OPTION[[L]]])
+all(a:[L], stack:[OPTION([L])])
      require
           stack in sorted_stacks
      ensure
@@ -163,7 +155,7 @@ all(a:[L], stack:[OPTION[[L]]])
    ===========
 :}
 
-merge_stack (stack: [OPTION[[L]]]): [L]
+merge_stack (stack: [OPTION([L])]): [L]
     -> inspect
            stack
        case [] then
@@ -173,7 +165,7 @@ merge_stack (stack: [OPTION[[L]]]): [L]
        case value(a) ^ rest then
            merge(a, merge_stack(rest))
 
-all(stack:[OPTION[[L]]])
+all(stack:[OPTION([L])])
      require
           stack in sorted_stacks
      ensure

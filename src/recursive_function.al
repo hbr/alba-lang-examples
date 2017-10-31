@@ -6,68 +6,30 @@ end
 
 
 
-
-{: Needed list functions
-   =====================
-:}
-A: ANY
-
-length (a:[A]): NATURAL
-    -> inspect
-           a
-       case [] then
-           0
-       case x ^ xs then
-           xs.length + 1
+class
+    RECURSIVE
+create
+    zero
+    successor
+    compose (g:RECURSIVE, hs:[RECURSIVE])
+    recurse (f,g:RECURSIVE)
+    minimize (p:RECURSIVE)
+end
 
 
-[] (a:[A], i:NATURAL): A
-        -- The ith element of the list 'a'.
-    require
-        i < a.length
-    ensure
-        -> inspect
-               a
-           case x ^ xs then
-               inspect
-                   i
-               case 0 then
-                   x
-               case j.successor then
-                   xs[j]
-    end
+primitives: ghost {RECURSIVE,NATURAL}
+    = {(pr):
+          pr(zero,0)
+          ,
+          pr(successor,1)
+          ,
+          all(g,n,hs,m) pr(g,n) ==>
+                   hs.length = n ==>
+                   (all(h) h in hs ==> pr(h,m)) ==>
+                   pr(compose(g,hs),m)
+      }
 
 
-all(a:[A])
-    require
-        a as _ ^ _
-    ensure
-        0 < a.length
-    via some(x,xs) a = x ^ xs
-    end
-
-all(a:[A])
-    require
-        a as _ ^ _
-    ensure
-        1 <= a.length
-    assert
-        0 + 1 <= a.length
-    end
-
-all(a:[A])
-        {: This proof is needed as long as advanced as-expression handling is
-           not yet implemented :}
-    require
-        a as [_]
-    ensure
-        a as _ ^ _
-    via some(x) a = [x]
-    end
-
-
-
-{: end list functions :}
 
 
 all(n:NATURAL)
@@ -378,7 +340,6 @@ primitive_recursives: ghost {[NATURAL]->NATURAL}
 minimize (f:[NATURAL]->NATURAL): ghost ([NATURAL]->NATURAL)
     require
         f.is_function
-        0 < f.arity
         all(a) f.has_arity(a.length+1) ==> {n: f(n ^ a) = 0}.has_some
     ensure
         -> agent (a)
